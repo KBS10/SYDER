@@ -1,112 +1,147 @@
 # SYDER_Android
-2020/05/02
+2020/04/29
 -------------
-* DB에서 데이터 가져와서 적용 -> volley실행 순서로 인한 오류
-* volley실행 순서로 인한 오류 수정
+* 가상머신에서 회원가입과 로그인이 잘 이루어졌는데, 실 기계에서 에러가 난 경우
+IOException : Cleartext HTTP traffic to "API 주소" not permitted
+원인 : Android 9버전 부터 http에 대한 보안정책이 강화
+해결 : AndroidManifest.XML 파일에
+android : uses CleartextTraffic = "true" 삽입
 
-2020/05/03 
--------------
-* logout추가 
-* DB변경에 따른 코드 수정
 
-2020/05/04
+2020/05/01
 -------------
-* 마커 이미지 차로 수정 및 추가 png파일 추가 
-* 비트이미지로 변경하여 필요한 크기로 조정
+* logout api 구현
+* Laravel 에서는 Bearer 형식 Authorization 으로 토큰을 보냄
+* Json 파일의 형식에 대해 확실하게 알 것.
+
+2020/05/03
+-------------
+* requestQueue.add(logoutRequest) 오류
+Oncreate 함수내에 requestQueue = Volley.new RequestQueue(this); 초기화 문제 해결
+* logout => 만료된 토큰을 가져오면 Access Denied 
+- Laravel 에서 오류 Json 파일을 보내줌
 
 2020/05/05
 -------------
-* 마커모델 생성으로 동적으로 마커 생성 
-* 마커 클릭 이벤트 처리 조정 및 ui제작
+* Laravel 에서 오류 Json 파일을 Log.cat에 입력이 되는지 확인
+OnErrorResponse 함수내에
+NetworkResponse response = error.networkResponse;
+String jsonError = new String(response.data); 추가
+* logout 구현 완료
 
 2020/05/07
 -------------
-* sendActivity 수정
-* 주문 출발지 도착지 지정 및 레이아웃 표시
-* activity_main 레이아웃 위치조정
+* 주문 출발지 도착지 업데이트
+* activity_send 구현 시작
+* activity_send 는 get 방식
+String url = "http://13.124.189.186/api/user/request?phone="+phoneNumber+"&guard=user";
+토큰은 똑같은 방법
+* Error -> Access Denied 해결중
 
 2020/05/09
 -------------
-* sendActivity -> 현 volley의 실행순서 문제
-* 주문 출발지 도착지 지정 및 삭제 제한, 마커 커스텀 
-* sendActivity.xml 수정
+* Laravel에서 토큰값 부여 오류 admin : guard 에 해당하는 토큰값은 없음
+Error -> Access Denied 해결
+Laravel 에서 수정 admin : user에 대한 토큰값
+* Laravel에서 저장된 데이터 불러온 후 setText 하는데 버튼을 2번 눌러야지 값이 불러와짐. 원인도 찾지 못함.
 
 2020/05/10
 -------------
-* 주문 출발지 도착지 지정시 나머지 마커 삭제 구현
-* MarkerModel 생성자 추가
-* 구현된 마커와 레이아웃 가시성 동적으로 변경
-* volley 콜백 구현 중
+* Volley 콜백에 대해 구현중
+서버 통신은 비동기작업이기때문에 checkSender메서드 호출하고 바로 setText를 해버리면 아직 처리 중이니 null 값이 가져옴
+Volley에 대한 순서도 이해 부족 아직 해결중
+* GoogleAPI Update 출발지, 도착지
 
-2020/05/12
+2020/05/11
 -------------
-* socket.io를 이용한 소켓통신 틀 구성
-* activity_send의 Handler로 volley 오류 수정
+* 서버 통신 비동기 작업에 대한 오류 해결 
+Handler 부여
 
-2020/05/13
--------------
-* activity_send의 Handler -> callback 인자로 수정
+mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d("응답", receiverName + receiverID);
+                        binding.senderName.setText(receiverName);
 
-2020/05/14
--------------
-* 스토리보드에 따른 레이아웃 생성 -> 하나의 화면에 조건을 부여하여 몰아서 할지 여러개로 나눌지 고민중
+                    }
+                }, 100);
+                
+ - 추후 리팩토링 할때 교수님에게 물어서 코드 수정
+ * Laravel에서 Error 메세지를 보내줄때 일치하는 수신자가 없다는 Toast 추가
+ 
+ 2020/05/12
+ -------------
+ * 서버 통신 비동기 작업에 대한오류 해결 2
+ onResponse 함수내에 setText 넣으면 해결
+ - 콜백으로 등록되서 바로 호출 되는것이 아니고 서버 응답이 오면 호출
+ 
+ 2020/05/13
+ -------------
+ * QR코드 시작
+ - 새로운 프로젝트 생성 후 QR코드 생성 및 스캔 구현
+ -> 추후 Laravel에서 보내주는 데이터를 이용해 QR코드 생성
+
+2020/05/15
+ -------------
+* 실 프로젝트에 QR코드 생성( EditText에 입력되는 값) 및 스캔 구현
 
 2020/05/16
--------------
-* 스토리보드에 따른 레이아웃 생성 -> 하나의 화면에 몰아서 하기로 -> 조건은 아직
-* activity_send -- volley를 이용해 등록
+ -------------
+ * Laravel 에서 보내주는 Data를 가지고 QR코드 생성
+ 
+ 2020/05/17
+ -------------
+ * Laravel에서 보내주는 값(QR코드 인식)에따라 Json파일 읽기
+ * 유동적으로 화면이 돌아가도록 구현
 
-2020/05/18
--------------
-* FCM토큰 테스트 
 
-2020/05/19
---------------
-* refactoring -> xml_id, class_id
-* QR코드 테스트
+ 2020/05/18
+ -------------
+ * FCM 알림 새로운 프로젝트 생성 후 확인
+ * FCM Test
+ 
+ 2020/05/19
+ -------------
+ * xml-id, class 파일 refectoring
+ * Android Studio 현재까지 구현한 거 코드 합침
+ 
+ 2020/05/21
+ -------------
+ * 실 프로젝트 FCM Test 확인
+ 
+ 2020/05/22
+ -------------
+ * 수신동의 알림 구현
+ * 포그라운드 상태인 앱에서 알림 메세지 또는 데이터 메세지를 수신하려면 onMessageReceived 콜백을 처리하는 코드를 작성해야 한다.
 
-2020/05/20
---------------
-* FCM 토큰 프로젝트에 적용 -> 실패
-
-2020/05/21
----------------
-* api orders/check, routes 적용
-* 스토리보드에 나온 xml 완성
-
-2020/05/23
----------------
-* api orders/show 적용 -> 상황에 따른 동작 구현
-* api orders/check 알고리즘 수정 -> 알림 시 알고리즘 
-
-2020/05/24
----------------
-* api orderCheck 적용
-* RouteModel 생성
-* api order/register 데이터 유동적으로 보내기
-* Fcm token을 이용한 알림 적용 -> 아직 임의의 값만 
-
-2020/05/25
-----------------
-* orders 오류 수정
-* api consent req, res 적용 및 테스트완료
-
-2020/05/26
-----------------
-* [happy ending]주문과정에 따른 api 테스트
-* 수신자와 발신자 한기기에서 적용 됨 -> fcm을 이용해 나눠서 
-
-2020/05/27
-----------------
-* fcm을 이용한 알림 테스트 -> 알림이 올 때도 있고 안 올 때도 있다.
-* -> 문제점 : 알림 클릭시 앱이 실행을 안함 
-
-2020/05/28
-----------------
-* fcm 알림 안 오는 오류 수정  
-* 알림이 포그라운드에서만 클릭이벤트 실행-> 백그라운드에서는 이벤트 실행X
+ 
+ 2020/05/23
+ -------------
+ * 수신동의 xml 생성 -> 수신동의완료 알림 구현
+ * FCM 데이터 받아오는 것이 안됨..
+ * 알림을 클릭 시 원하는 Activity로 가는 것이 안됨...
+ -> 해결할것들
+ 
+ 2020/05/24
+ -------------
+ 주문정보랑 FCM정보를 구분짓다보니 서로의 필요한 데이터가 있기때문에 효율이 없어
+ 테스트 모듈로 들어가기 시작
+ 
+ 2020/05/25
+ -------------
+ * Node.js 소켓 통신에 대한 이해
+ * on, emit에 대한 이해
+ 
+ 2020/05/26
+ -------------
+ * Socket통신 적용 ( 실시간 차량 위치 가져오기)
+ 
+ 
+ 2020/05/27
+ -------------
+* 실시간 차량 위치 마커 찍기 ( list 삭제 )
 
 2020/05/30
------------------
-* 추가적인 알림들에 대한 이벤트 추가
-* 소켓통신으로 차량위치 받아오기 -> 병합
+------------
+* 실시간 마커 찍기( 마커 삭제 구현 )
+* 주문 정보랑 코드 합침
