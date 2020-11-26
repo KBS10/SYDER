@@ -62,9 +62,6 @@ mHandler.postDelayed(new Runnable() {
                     public void run() {
                         Log.d("응답", receiverName + receiverID);
                         binding.senderName.setText(receiverName);
-
-                    }
-                }, 100);
                 
  - 추후 리팩토링 할때 교수님에게 물어서 코드 수정
  * Laravel에서 Error 메세지를 보내줄때 일치하는 수신자가 없다는 Toast 추가
